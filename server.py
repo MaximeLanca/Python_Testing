@@ -67,8 +67,7 @@ def purchasePlaces():
     placesRequired = int(request.form['places'])
     competition['numberOfPlaces'] = int(competition['numberOfPlaces'])-placesRequired
     flash('Great-booking complete!')
-    return render_template('welcome.html', club=club, competitions=competitions)
-
+    return redirect(url_for('welcome', club_name=club["name"]))
 
 # TODO: Add route for points display
 
