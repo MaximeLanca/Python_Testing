@@ -60,6 +60,9 @@ def purchasePlaces():
     if placesRequired > 12 or placesRequired <= 0 :
         flash("Unauthorized purchase.")
         return redirect(url_for('welcome', club_name=club["name"]))
+    if placesNumber < placesRequired :
+        flash (f"They aren't available space for {placesRequired} places")
+        return redirect(url_for('welcome', club_name=club["name"]))
 
     placesRequired = int(request.form['places'])
     competition['numberOfPlaces'] = int(competition['numberOfPlaces'])-placesRequired
