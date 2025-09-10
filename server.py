@@ -26,7 +26,7 @@ def index():
 
 @app.get('/welcome/<club_name>')
 def welcome(club_name):
-    club = next ((c for c in clubs if c['name'] == club_name), None)
+    club = next ((club for club in clubs if club['name'] == club_name), None)
     if not club:
         flash('unknown club')
         return redirect(url_for('index'))
@@ -34,7 +34,12 @@ def welcome(club_name):
 
 @app.route('/showSummary',methods=['POST'])
 def showSummary():
-    club = [club for club in clubs if club['email'] == request.form['email']][0]
+    club = next ((club for club in clubs if club['email'] == request.form['email']), None)
+    if not club :
+        return redirect(url_for("index"))
+        
+        
+
     return render_template('welcome.html',club=club,competitions=competitions)
 
 

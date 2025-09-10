@@ -41,3 +41,6 @@ def test_purcharse_places_with_ten_points(client, club_with_ten_points):
     after = int(club[0]["points"])
     assert after == 10
 
+def test_unknown_club_redirect(client):
+    response = client.get("welcome/fake_club", follow_redirects=True)
+    assert response.status_code == 200
