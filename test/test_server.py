@@ -29,6 +29,15 @@ def test_purchase_places_more_than_available(client, competition_line_up_ten_pla
     after = int(competition[0]["numberOfPlaces"])
     assert after == 10
 
-
-
+def test_purcharse_places_with_ten_points(client, club_with_ten_points):
+    club = club_with_ten_points
+    response = client.post("/purchasePlaces", data ={
+        "competition":"Spring Festival",
+        "club" : "Simply Lift",
+        "places" : "12",
+        },
+        follow_redirects=True)
+    
+    after = int(club[0]["points"])
+    assert after == 10
 

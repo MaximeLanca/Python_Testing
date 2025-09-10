@@ -63,11 +63,15 @@ def purchasePlaces():
     if placesNumber < placesRequired :
         flash (f"They aren't available space for {placesRequired} places")
         return redirect(url_for('welcome', club_name=club["name"]))
-
-    placesRequired = int(request.form['places'])
-    competition['numberOfPlaces'] = int(competition['numberOfPlaces'])-placesRequired
-    flash('Great-booking complete!')
+    if int(club["points"]) < placesRequired:
+        flash (f"You don't have enough points for purchase {placesRequired} places")
+        return redirect(url_for('welcome', club_name=club["name"]))
+    
+    competition['numberOfPlaces'] = str(placesNumber - placesRequired)
+    flash(f"Great-booking complete! You purcharsed {placesRequired} places.")
     return redirect(url_for('welcome', club_name=club["name"]))
+
+    
 
 # TODO: Add route for points display
 

@@ -20,11 +20,6 @@ def user_context():
     }
     return data
 
-#@pytest.fixture(autouse=True)
-#def reset_data (monkeypatch):
-    # competitions = [{"name": "Spring Festival", "date": "2026-03-27 10:00:00", "numberOfPlaces": "25"},]
-    #monkeypatch.setattr(server, "competitions", deepcopy(competitions), raising=True)
-
 
 @pytest.fixture(params=[
     [{"name": "Spring Festival", "date": "2027-10-10 09:00:00", "numberOfPlaces": "25"}],
@@ -40,3 +35,9 @@ def competition_line_up_ten_places(request,monkeypatch):
     monkeypatch.setattr(server,"competitions",deepcopy(request.param))
     return server.competitions
 
+@pytest.fixture(params=[
+    [{"name":"Simply Lift", "email":"john@simplylift.co", "points":"10"}]
+])
+def club_with_ten_points(request, monkeypatch):
+    monkeypatch.setattr(server,"clubs",deepcopy(request.param))
+    return server.clubs
