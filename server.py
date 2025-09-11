@@ -1,5 +1,10 @@
 import json
 from flask import Flask,render_template,request,redirect,flash,url_for
+from utils import check_competition_date
+
+app = Flask(__name__)
+app.secret_key = 'something_special'
+app.jinja_env.filters["check_competition_date"] = check_competition_date
 
 
 def loadClubs():
@@ -12,11 +17,7 @@ def loadCompetitions():
     with open('competitions.json') as comps:
          listOfCompetitions = json.load(comps)['competitions']
          return listOfCompetitions
-
-
-app = Flask(__name__)
-app.secret_key = 'something_special'
-
+    
 competitions = loadCompetitions()
 clubs = loadClubs()
 
@@ -37,9 +38,6 @@ def showSummary():
     club = next ((club for club in clubs if club['email'] == request.form['email']), None)
     if not club :
         return redirect(url_for("index"))
-        
-        
-
     return render_template('welcome.html',club=club,competitions=competitions)
 
 
