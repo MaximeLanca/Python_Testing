@@ -1,6 +1,8 @@
 import json
 from flask import Flask,render_template,request,redirect,flash,url_for
 from utils import check_competition_date
+from save import save_clubs, save_competitions
+
 
 app = Flask(__name__)
 app.secret_key = 'something_special'
@@ -69,8 +71,14 @@ def purchasePlaces():
     if int(club["points"]) < placesRequired:
         flash (f"You don't have enough points for purchase {placesRequired} places")
         return redirect(url_for('welcome', club_name=club["name"]))
+    if not (check_competition_date(competition['date'])):
+        flash ("The competition is over.")
+        return redirect(url_for('welcome', club_name=club["name"]))
     
     competition['numberOfPlaces'] = str(placesNumber - placesRequired)
+    club['points'] = str(int(club['points']) - placesRequired)
+    save_clubs(clubs)
+    save_competitions(competitions)
     flash(f"Great-booking complete! You purcharsed {placesRequired} places.")
     return redirect(url_for('welcome', club_name=club["name"]))
 
