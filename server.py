@@ -1,27 +1,19 @@
 import json
 from flask import Flask,render_template,request,redirect,flash,url_for
 from utils import check_competition_date
-from save import save_clubs, save_competitions
+from data import save_clubs, save_competitions, load_clubs, load_competitions
 
 
 app = Flask(__name__)
 app.secret_key = 'something_special'
 app.jinja_env.filters["check_competition_date"] = check_competition_date
 
+def reload_data():
+    global competitions, clubs
+    competitions = load_competitions()
+    clubs = load_clubs()
 
-def loadClubs():
-    with open('clubs.json') as c:
-         listOfClubs = json.load(c)['clubs']
-         return listOfClubs
-
-
-def loadCompetitions():
-    with open('competitions.json') as comps:
-         listOfCompetitions = json.load(comps)['competitions']
-         return listOfCompetitions
-    
-competitions = loadCompetitions()
-clubs = loadClubs()
+reload_data()
 
 @app.route('/')
 def index():
@@ -35,8 +27,8 @@ def welcome(club_name):
         return redirect(url_for('index'))
     return render_template('welcome.html', club=club, competitions=competitions)
 
-@app.route('/showSummary',methods=['POST'])
-def showSummary():
+@app.route('/show_summary',methods=['POST'])
+def show_summary():
     club = next ((club for club in clubs if club['email'] == request.form['email']), None)
     if not club :
         return redirect(url_for("index"))
@@ -45,41 +37,41 @@ def showSummary():
 
 @app.route('/book/<competition>/<club>')
 def book(competition,club):
-    foundClub = [c for c in clubs if c['name'] == club][0]
-    foundCompetition = [c for c in competitions if c['name'] == competition][0]
-    if foundClub and foundCompetition:
-        return render_template('booking.html',club=foundClub,competition=foundCompetition)
+    found_club = next ([c for c in clubs if c['name'] == club][0], None)
+    found_competition = ([c for c in competitions if c['name'] == competition][0], None)
+    if found_club and found_competition:
+        return render_template('booking.html',club=found_club,competition=found_competition)
     else:
         flash("Something went wrong-please try again")
         return render_template('welcome.html', club=club, competitions=competitions)
 
 
-@app.route('/purchasePlaces',methods=['POST'])
-def purchasePlaces():
+@app.route('/purchase_places',methods=['POST'])
+def purchase_places():
     competition = [c for c in competitions if c['name'] == request.form['competition']][0]
     club = [c for c in clubs if c['name'] == request.form['club']][0]
 
-    placesRequired = int(request.form['places'])
-    placesNumber = int(competition['numberOfPlaces'])
+    places_required = int(request.form['places'])
+    places_number = int(competition['numberOfPlaces'])
 
-    if placesRequired > 12 or placesRequired <= 0 :
+    if places_required > 12 or places_required <= 0 :
         flash("Unauthorized purchase.")
         return redirect(url_for('welcome', club_name=club["name"]))
-    if placesNumber < placesRequired :
-        flash (f"They aren't available space for {placesRequired} places")
+    if places_number < places_required :
+        flash (f"They aren't available space for {places_required} places")
         return redirect(url_for('welcome', club_name=club["name"]))
-    if int(club["points"]) < placesRequired:
-        flash (f"You don't have enough points for purchase {placesRequired} places")
+    if int(club["points"]) < places_required:
+        flash (f"You don't have enough points for purchase {places_required} places")
         return redirect(url_for('welcome', club_name=club["name"]))
     if not (check_competition_date(competition['date'])):
         flash ("The competition is over.")
         return redirect(url_for('welcome', club_name=club["name"]))
     
-    competition['numberOfPlaces'] = str(placesNumber - placesRequired)
-    club['points'] = str(int(club['points']) - placesRequired)
+    competition['numberOfPlaces'] = str(places_number - places_required)
+    club['points'] = str(int(club['points']) - places_required)
     save_clubs(clubs)
     save_competitions(competitions)
-    flash(f"Great-booking complete! You purcharsed {placesRequired} places.")
+    flash(f"Great-booking complete! You purcharsed {places_required} places.")
     return redirect(url_for('welcome', club_name=club["name"]))
 
     

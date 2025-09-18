@@ -1,6 +1,6 @@
 import pytest
 import server
-from copy import deepcopy
+import data
 
 @pytest.fixture
 def app():
@@ -21,42 +21,37 @@ def user_context():
     return data
 
 
-@pytest.fixture(params=[
-    [{"name": "Spring Festival", "date": "2027-10-10 09:00:00", "numberOfPlaces": "25"}],
-])
-def competition_line_up_twenty_five_places(request,monkeypatch):
-    monkeypatch.setattr(server,"competitions",deepcopy(request.param))
+@pytest.fixture
+def competition_line_up_twenty_five_places(monkeypatch):
+    monkeypatch.setattr(data,"load_competitions",[{"name": "Spring Festival", "date": "2027-10-10 09:00:00", "numberOfPlaces": "25"}])
+    server.reload_data()
     return server.competitions
 
-@pytest.fixture(params=[
-    [{"name": "Spring Festival", "date": "2027-10-10 09:00:00", "numberOfPlaces": "10"}],
-])
-def competition_line_up_ten_places(request,monkeypatch):
-    monkeypatch.setattr(server,"competitions",deepcopy(request.param))
+@pytest.fixture
+def competition_line_up_ten_places(monkeypatch):
+    monkeypatch.setattr(data,"load_competitions",[{"name": "Spring Festival", "date": "2027-10-10 09:00:00", "numberOfPlaces": "10"}])
+    server.reload_data()
     return server.competitions
 
-@pytest.fixture(params=[
-    [{"name": "Spring Festival", "date": "2025-08-10 09:00:00", "numberOfPlaces": "10"}],
-])
-def finished_competition(request,monkeypatch):
-    monkeypatch.setattr(server,"competitions",deepcopy(request.param))
+@pytest.fixture
+def finished_competition(monkeypatch):
+    monkeypatch.setattr(data,"load_competitions",[{"name": "Spring Festival", "date": "2025-08-10 09:00:00", "numberOfPlaces": "10"}])
+    server.reload_data()
     return server.competitions
 
-@pytest.fixture(params=[
-    [{"name":"Simply Lift", "email":"john@simplylift.co", "points":"10"}]
-])
-def club_with_ten_points(request, monkeypatch):
-    monkeypatch.setattr(server,"clubs",deepcopy(request.param))
+@pytest.fixture
+def club_with_ten_points(monkeypatch):
+    monkeypatch.setattr(data,"load_clubs",[{"name":"Simply Lift", "email":"john@simplylift.co", "points":"10"}])
+    server.reload_data()
     return server.clubs
 
 @pytest.fixture
 def clubs_simply_lift(monkeypatch):
-    monkeypatch.setattr(
-        server, "clubs",
-        [{"name": "Simply Lift", "email": "john@simplylift.co", "points": "13"}]
-    )
+    monkeypatch.setattr(data, "load_clubs",[{"name": "Simply Lift", "email": "john@simplylift.co", "points": "13"}])
+    server.reload_data()
+    return server.clubs
 
 @pytest.fixture(autouse=True)
 def no_backup(monkeypatch):
-    monkeypatch.setattr("server.save_clubs", lambda clubs, path="clubs.json": None, raising=True)
-    monkeypatch.setattr("server.save_competitions", lambda competitions, path="competitions.json": None, raising=True)
+    monkeypatch.setattr("data.save_clubs", lambda clubs, path="clubs.json": None, raising=True)
+    monkeypatch.setattr("data.save_competitions", lambda competitions, path="competitions.json": None, raising=True)

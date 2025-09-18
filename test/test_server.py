@@ -6,7 +6,7 @@ def test_purchase_places_parametrized(client, competition_line_up_twenty_five_pl
     competition = competition_line_up_twenty_five_places
     before = int(competition[0]["numberOfPlaces"])
     assert before == 25
-    response = client.post("/purchasePlaces", data={
+    response = client.post("/purchase_places", data={
         "competition":"Spring Festival",
         "club" : "Simply Lift",
         "places" : str(places),
@@ -19,7 +19,7 @@ def test_purchase_places_parametrized(client, competition_line_up_twenty_five_pl
 
 def test_purchase_places_more_than_available(client, competition_line_up_ten_places):
     competition = competition_line_up_ten_places
-    response = client.post("/purchasePlaces", data ={
+    response = client.post("/purchase_places", data ={
         "competition":"Spring Festival",
         "club" : "Simply Lift",
         "places" : "12",
@@ -31,7 +31,7 @@ def test_purchase_places_more_than_available(client, competition_line_up_ten_pla
 
 def test_purcharse_places_with_ten_points(client, club_with_ten_points):
     club = club_with_ten_points
-    response = client.post("/purchasePlaces", data ={
+    response = client.post("/purchase_places", data ={
         "competition":"Spring Festival",
         "club" : "Simply Lift",
         "places" : "12",
@@ -47,7 +47,7 @@ def test_unknown_club_redirect(client):
 
 def test_purchase_places_in_finished_competition(client, finished_competition):
     competition = finished_competition
-    response = client.post("/purchasePlaces", data ={
+    response = client.post("/purchase_places", data ={
         "competition":"Spring Festival",
         "club" : "Simply Lift",
         "places" : "2",
