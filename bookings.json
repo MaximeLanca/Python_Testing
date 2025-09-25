@@ -1,0 +1,22 @@
+{
+  "bookings": [
+    {
+      "competition": "Sunny Winter",
+      "club": "Simply Lift",
+      "places": "2",
+      "reserved_at": "datetime.now"
+    },
+    {
+      "competition": "Sunny Winter",
+      "club": "Iron Temple",
+      "places": "2",
+      "reserved_at": "datetime.now"
+    },
+    {
+      "competition": "Sunny Winter",
+      "club": "Iron Temple",
+      "places": "4",
+      "reserved_at": "datetime.now"
+    }
+  ]
+}

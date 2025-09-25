@@ -1,7 +1,8 @@
 import json
 from flask import Flask,render_template,request,redirect,flash,url_for
-from utils import check_competition_date
-from data import save_clubs, save_competitions, load_clubs, load_competitions
+from utils import check_competition_date, get_places_purchased
+from data import save_clubs, save_competitions, load_clubs, load_competitions, save_booking
+from datetime import datetime
 
 
 app = Flask(__name__)
@@ -9,10 +10,10 @@ app.secret_key = 'something_special'
 app.jinja_env.filters["check_competition_date"] = check_competition_date
 
 def reload_data():
-    global competitions, clubs
+    global competitions, clubs, booking_list
     competitions = load_competitions()
     clubs = load_clubs()
-
+    
 reload_data()
 
 @app.route('/')
@@ -37,8 +38,8 @@ def show_summary():
 
 @app.route('/book/<competition>/<club>')
 def book(competition,club):
-    found_club = next ([c for c in clubs if c['name'] == club][0], None)
-    found_competition = ([c for c in competitions if c['name'] == competition][0], None)
+    found_club = next ((c for c in clubs if c['name'] == club), None)
+    found_competition = next ((c for c in competitions if c['name'] == competition), None)
     if found_club and found_competition:
         return render_template('booking.html',club=found_club,competition=found_competition)
     else:
@@ -48,8 +49,8 @@ def book(competition,club):
 
 @app.route('/purchase_places',methods=['POST'])
 def purchase_places():
-    competition = [c for c in competitions if c['name'] == request.form['competition']][0]
-    club = [c for c in clubs if c['name'] == request.form['club']][0]
+    competition = next((c for c in competitions if c['name'] == request.form['competition']), None)
+    club = next((c for c in clubs if c['name'] == request.form['club']), None)
 
     places_required = int(request.form['places'])
     places_number = int(competition['numberOfPlaces'])
@@ -57,20 +58,36 @@ def purchase_places():
     if places_required > 12 or places_required <= 0 :
         flash("Unauthorized purchase.")
         return redirect(url_for('welcome', club_name=club["name"]))
+    
     if places_number < places_required :
         flash (f"They aren't available space for {places_required} places")
         return redirect(url_for('welcome', club_name=club["name"]))
+    
     if int(club["points"]) < places_required:
         flash (f"You don't have enough points for purchase {places_required} places")
         return redirect(url_for('welcome', club_name=club["name"]))
+    
     if not (check_competition_date(competition['date'])):
         flash ("The competition is over.")
         return redirect(url_for('welcome', club_name=club["name"]))
     
-    competition['numberOfPlaces'] = str(places_number - places_required)
+    places_purchased = get_places_purchased(club,competition)
+
+    if ( places_purchased + places_required ) > 12:
+        flash ("You have reached the purchase limit.")
+        return redirect(url_for('welcome', club_name=club["name"]))
+    
     club['points'] = str(int(club['points']) - places_required)
+    competition['numberOfPlaces'] = str(places_number - places_required)
+    booking={   "competition": competition['name'],
+                "club": club['name'],
+                "places": str(places_purchased + places_required),
+                "reserved_at": datetime.now}
+
+  
     save_clubs(clubs)
     save_competitions(competitions)
+    save_booking(booking)
     flash(f"Great-booking complete! You purcharsed {places_required} places.")
     return redirect(url_for('welcome', club_name=club["name"]))
 
