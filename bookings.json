@@ -17,6 +17,78 @@
       "club": "Iron Temple",
       "places": "4",
       "reserved_at": "datetime.now"
+    },
+    {
+      "competition": "Fall Classic",
+      "club": "Iron Temple",
+      "places": "2",
+      "reserved_at": "datetime.now"
+    },
+    {
+      "competition": "Fall Classic",
+      "club": "Iron Temple",
+      "places": "4",
+      "reserved_at": "datetime.now"
+    },
+    {
+      "competition": "Sunny Winter",
+      "club": "Iron Temple",
+      "places": "10",
+      "reserved_at": "datetime.now"
+    },
+    {
+      "competition": "Fall Classic",
+      "club": "Iron Temple",
+      "places": "6",
+      "reserved_at": "datetime.now"
+    },
+    {
+      "competition": "Fall Classic",
+      "club": "Iron Temple",
+      "places": "6",
+      "reserved_at": "datetime.now"
+    },
+    {
+      "competition": "Fall Classic",
+      "club": "Iron Temple",
+      "places": "2",
+      "reserved_at": "datetime.now"
+    },
+    {
+      "competition": "Sunny Winter",
+      "club": "She Lifts",
+      "places": "11",
+      "reserved_at": "datetime.now"
+    },
+    {
+      "competition": "Sunny Winter",
+      "club": "She Lifts",
+      "places": "1",
+      "reserved_at": "datetime.now"
+    },
+    {
+      "competition": "Sunny Winter",
+      "club": "She Lifts",
+      "places": "1",
+      "reserved_at": "datetime.now"
+    },
+    {
+      "competition": "Fall Classic",
+      "club": "Simply Lift",
+      "places": "3",
+      "reserved_at": "datetime.now"
+    },
+    {
+      "competition": "Fall Classic",
+      "club": "Simply Lift",
+      "places": "1",
+      "reserved_at": "datetime.now"
+    },
+    {
+      "competition": "Fall Classic",
+      "club": "Simply Lift",
+      "places": "2",
+      "reserved_at": "2025-10-02 18:02:58.408836"
     }
   ]
 }

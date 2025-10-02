@@ -74,6 +74,17 @@ def finished_competition(monkeypatch):
     server.reload_data()
     return server.competitions
 
+@pytest.fixture
+def club_with_twenty_five_points(monkeypatch):
+    monkeypatch.setattr(
+        data,
+        "load_clubs",
+        lambda: [
+            {"name": "Simply Lift", "email": "john@simplylift.co", "points": "25"}
+        ],
+    )
+    server.reload_data()
+    return server.clubs
 
 @pytest.fixture
 def club_with_ten_points(monkeypatch):
@@ -101,13 +112,17 @@ def clubs_simply_lift(monkeypatch):
     return server.clubs
 
 
+
 @pytest.fixture(autouse=True)
 def no_backup(monkeypatch):
-    monkeypatch.setattr(
-        "data.save_clubs", lambda clubs, path="clubs.json": None, raising=True
-    )
-    monkeypatch.setattr(
-        "data.save_competitions",
-        lambda competitions, path="competitions.json": None,
-        raising=True,
-    )
+    monkeypatch.setattr("data.save_clubs", lambda clubs, path="clubs.json": None, raising=True)
+    monkeypatch.setattr("data.save_competitions", lambda comps, path="competitions.json": None, raising=True)
+    monkeypatch.setattr("data.save_booking", lambda bookings, path="bookings.json": None, raising=True)
+  
+  
+@pytest.fixture
+def limit_purchase_twelve_places_in_different_section(monkeypatch):
+    monkeypatch.setattr("utils.get_purchased_places",lambda path="bookings.json":"bookings_for_tests.json",raising=True)
+    monkeypatch.setattr("data.save_booking", lambda bookings, path="bookings.json":None,raising=True)
+    monkeypatch.setattr("data.save_competitions", lambda comps, path="competitions.json": None, raising=True)
+    
