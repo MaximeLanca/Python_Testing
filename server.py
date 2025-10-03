@@ -11,12 +11,10 @@ app = Flask(__name__)
 app.secret_key = 'something_special'
 app.register_blueprint(filters_bp)
 
-def reload_data():
-    global competitions, clubs, booking_list
-    competitions = load_competitions()
-    clubs = load_clubs()
-    
-reload_data()
+competitions = load_competitions()
+clubs = load_clubs()
+print("compte")
+
 
 @app.route('/')
 def index():
@@ -37,6 +35,9 @@ def show_summary():
         return redirect(url_for("index"))
     return render_template('welcome.html',club=club,competitions=competitions)
 
+@app.route('/show_clubs_point')
+def show_clubs_point_table():
+    return render_template('clubs_point_table.html',clubs=clubs)
 
 @app.route('/book/<competition>/<club>')
 def book(competition,club):
@@ -57,7 +58,7 @@ def purchase_places():
 
     places_required = int(request.form['places'])
     places_number = int(competition['numberOfPlaces'])
-
+    
     if places_required > 12 or places_required <= 0 :
         flash("Unauthorized purchase.")
         return redirect(url_for('welcome', club_name=club["name"]))
@@ -92,6 +93,8 @@ def purchase_places():
     save_competitions(competitions)
     save_booking(booking)
     flash(f"Great-booking complete! You purcharsed {places_required} places.")
+
+    print(clubs,competitions)
     return redirect(url_for('welcome', club_name=club["name"]))
 
     

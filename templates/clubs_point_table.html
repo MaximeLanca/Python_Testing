@@ -1,0 +1,19 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clubs point table</title>
+</head>
+<body>
+        <h2>Clubs point table</h2>
+         <ul>
+        {% for club in clubs%}
+        <li>
+            {{club['name']}}<br />
+            Point: {{club['points']}}</br>
+        </li>
+        <hr />
+        {% endfor %}
+    </ul>
+</body>
+</html>

@@ -89,6 +89,18 @@
       "club": "Simply Lift",
       "places": "2",
       "reserved_at": "2025-10-02 18:02:58.408836"
+    },
+    {
+      "competition": "Fall Classic",
+      "club": "Simply Lift",
+      "places": "1",
+      "reserved_at": "2025-10-02 20:20:42.574431"
+    },
+    {
+      "competition": "Fall Classic",
+      "club": "Simply Lift",
+      "places": "1",
+      "reserved_at": "2025-10-02 20:22:51.179924"
     }
   ]
 }

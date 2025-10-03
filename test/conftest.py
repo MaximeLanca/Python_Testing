@@ -3,6 +3,13 @@ import server
 import data
 
 
+# @pytest.fixture(autouse=True)
+# def patch_reload(monkeypatch):
+#     def fake_reload():
+#         server.clubs = data.load_clubs()
+#         server.competitions = data.load_competitions()
+#     monkeypatch.setattr(server, "reload_data", fake_reload, raising=True)
+
 @pytest.fixture
 def app():
     """Fixture requise par pytest-flask : retourne l'app Flask."""
@@ -27,7 +34,7 @@ def user_context():
 @pytest.fixture
 def competition_line_up_twenty_five_places(monkeypatch):
     monkeypatch.setattr(
-        data,
+        server,
         "load_competitions",
         lambda: [
             {
@@ -37,8 +44,13 @@ def competition_line_up_twenty_five_places(monkeypatch):
             }
         ],
     )
-    server.reload_data()
-    return server.competitions
+    return [
+            {
+                "name": "Spring Festival",
+                "date": "2027-10-10 09:00:00",
+                "numberOfPlaces": "25",
+            }
+        ]
 
 
 @pytest.fixture
@@ -83,8 +95,9 @@ def club_with_twenty_five_points(monkeypatch):
             {"name": "Simply Lift", "email": "john@simplylift.co", "points": "25"}
         ],
     )
-    server.reload_data()
-    return server.clubs
+    return [
+            {"name": "Simply Lift", "email": "john@simplylift.co", "points": "25"}
+        ],
 
 @pytest.fixture
 def club_with_ten_points(monkeypatch):
@@ -95,8 +108,9 @@ def club_with_ten_points(monkeypatch):
             {"name": "Simply Lift", "email": "john@simplylift.co", "points": "10"}
         ],
     )
-    server.reload_data()
-    return server.clubs
+    return [
+            {"name": "Simply Lift", "email": "john@simplylift.co", "points": "10"}
+        ]
 
 
 @pytest.fixture
@@ -108,8 +122,9 @@ def clubs_simply_lift(monkeypatch):
             {"name": "Simply Lift", "email": "john@simplylift.co", "points": "13"}
         ],
     )
-    server.reload_data()
-    return server.clubs
+    return [
+            {"name": "Simply Lift", "email": "john@simplylift.co", "points": "13"}
+        ]
 
 
 

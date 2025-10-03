@@ -1,8 +1,7 @@
 from utils import get_purchased_places
 
-def test_purchase_places_parametrized(client, competition_line_up_twenty_five_places, club_with_twenty_five_points):
+def test_purchase_places_parametrized(client, competition_line_up_twenty_five_places):
     competition = competition_line_up_twenty_five_places
-    club = club_with_twenty_five_points
     before = int(competition[0]["numberOfPlaces"])
     assert before == 25
     response = client.post(
