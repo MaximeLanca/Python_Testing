@@ -7,13 +7,13 @@
     },
     {
       "name": "Fall Classic",
-      "date": "2027-10-22 13:30:00",
-      "numberOfPlaces": "2"
+      "date": "2020-10-22 13:30:00",
+      "numberOfPlaces": "13"
     },
     {
       "name": "Sunny Winter",
       "date": "2027-12-04 11:30:00",
-      "numberOfPlaces": "6"
+      "numberOfPlaces": "18"
     }
   ]
 }

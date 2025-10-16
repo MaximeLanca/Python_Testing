@@ -1,6 +1,9 @@
 import pytest
+from unittest.mock import patch
+import json
 import server
 import data
+
 
 
 # @pytest.fixture(autouse=True)
@@ -21,123 +24,31 @@ def app():
 def client():
     return server.app.test_client()
 
-
-@pytest.fixture
-def user_context():
-    data = {
-        "name": "Simply Lift",
-        "email": "john@simplylift.co",
-    }
-    return data
-
-
-@pytest.fixture
-def competition_line_up_twenty_five_places(monkeypatch):
-    monkeypatch.setattr(
-        server,
-        "load_competitions",
-        lambda: [
-            {
-                "name": "Spring Festival",
-                "date": "2027-10-10 09:00:00",
-                "numberOfPlaces": "25",
-            }
-        ],
-    )
-    return [
-            {
-                "name": "Spring Festival",
-                "date": "2027-10-10 09:00:00",
-                "numberOfPlaces": "25",
-            }
-        ]
-
-
-@pytest.fixture
-def competition_line_up_ten_places(monkeypatch):
-    monkeypatch.setattr(
-        data,
-        "load_competitions",
-        lambda: [
-            {
-                "name": "Spring Festival",
-                "date": "2027-10-10 09:00:00",
-                "numberOfPlaces": "10",
-            }
-        ],
-    )
-    server.reload_data()
-    return server.competitions
-
-
-@pytest.fixture
-def finished_competition(monkeypatch):
-    monkeypatch.setattr(
-        data,
-        "load_competitions",
-        lambda: [
-            {
-                "name": "Spring Festival",
-                "date": "2025-08-10 09:00:00",
-                "numberOfPlaces": "10",
-            }
-        ],
-    )
-    server.reload_data()
-    return server.competitions
-
-@pytest.fixture
-def club_with_twenty_five_points(monkeypatch):
-    monkeypatch.setattr(
-        data,
-        "load_clubs",
-        lambda: [
-            {"name": "Simply Lift", "email": "john@simplylift.co", "points": "25"}
-        ],
-    )
-    return [
-            {"name": "Simply Lift", "email": "john@simplylift.co", "points": "25"}
-        ],
-
-@pytest.fixture
-def club_with_ten_points(monkeypatch):
-    monkeypatch.setattr(
-        data,
-        "load_clubs",
-        lambda: [
-            {"name": "Simply Lift", "email": "john@simplylift.co", "points": "10"}
-        ],
-    )
-    return [
-            {"name": "Simply Lift", "email": "john@simplylift.co", "points": "10"}
-        ]
-
-
-@pytest.fixture
-def clubs_simply_lift(monkeypatch):
-    monkeypatch.setattr(
-        data,
-        "load_clubs",
-        lambda: [
-            {"name": "Simply Lift", "email": "john@simplylift.co", "points": "13"}
-        ],
-    )
-    return [
-            {"name": "Simply Lift", "email": "john@simplylift.co", "points": "13"}
-        ]
-
-
-
-@pytest.fixture(autouse=True)
-def no_backup(monkeypatch):
-    monkeypatch.setattr("data.save_clubs", lambda clubs, path="clubs.json": None, raising=True)
-    monkeypatch.setattr("data.save_competitions", lambda comps, path="competitions.json": None, raising=True)
-    monkeypatch.setattr("data.save_booking", lambda bookings, path="bookings.json": None, raising=True)
-  
-  
-@pytest.fixture
-def limit_purchase_twelve_places_in_different_section(monkeypatch):
-    monkeypatch.setattr("utils.get_purchased_places",lambda path="bookings.json":"bookings_for_tests.json",raising=True)
-    monkeypatch.setattr("data.save_booking", lambda bookings, path="bookings.json":None,raising=True)
-    monkeypatch.setattr("data.save_competitions", lambda comps, path="competitions.json": None, raising=True)
     
+@pytest.fixture(autouse=True)
+def patch_load_save(bookings_path):
+
+    def fake_load_booking(path="bookings.json"):
+        return json.loads(bookings_path.read_text(encoding="utf-8")).get("bookings", [])
+
+    def fake_save_booking(booking, path="bookings.json"):
+        bookings = fake_load_booking()
+        bookings.append(booking)
+        bookings_path.write_text(json.dumps({"bookings": bookings}, indent=2), encoding="utf-8")
+
+
+    with patch("utils.load_booking", side_effect=fake_load_booking), \
+    patch("data.load_booking", side_effect=fake_load_booking), \
+    patch("server.save_booking", side_effect=fake_save_booking), \
+    patch("server.save_clubs", lambda *a, **k: None), \
+    patch("server.save_competitions", lambda *a, **k: None):
+        
+        yield
+    
+@pytest.fixture
+def bookings_path (tmp_path):
+
+    bookings_path = tmp_path / "bookings_test.json"
+    bookings_path.write_text('{"bookings": []}', encoding="utf-8")
+
+    return bookings_path

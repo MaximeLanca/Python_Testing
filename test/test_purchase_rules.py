@@ -1,116 +1,152 @@
 from utils import get_purchased_places
+from unittest.mock import patch
+from unittest.mock import patch
+import json, server
 
-def test_purchase_places_parametrized(client, competition_line_up_twenty_five_places):
-    competition = competition_line_up_twenty_five_places
-    before = int(competition[0]["numberOfPlaces"])
-    assert before == 25
+def test_purchase_places_in_competition(client, bookings_path):
+
+    with patch.object(server, "clubs", [
+            {"name": "Simply Lift", "email": "john@simplylift.co", "points": "25"}
+        ], create=True), \
+         patch.object(server, "competitions", [
+            {"name": "Spring Festival", "date": "2027-10-10 09:00:00", "numberOfPlaces": "13"}
+        ], create=True):
+
+        resp = client.post("/purchase_places", data={
+            "competition": "Spring Festival",
+            "club": "Simply Lift",
+            "places": "12", 
+        }, follow_redirects=True)
+        assert resp.status_code == 200
+
+        bookings = json.loads(bookings_path.read_text(encoding="utf-8"))["bookings"]
+        assert bookings[0]['competition'] == 'Spring Festival'
+        assert bookings[0]['club'] == 'Simply Lift'
+        assert bookings[0]['places'] == '12'
+
+
+
+@patch.object(server, "clubs", [
+    {"name": "Simply Lift", "email": "john@simplylift.co", "points": "25"}
+])
+@patch.object(server, "competitions", [
+    {"name": "Spring Festival", "date": "2027-10-10 09:00:00", "numberOfPlaces": "10"}
+])
+@patch("server.save_booking", lambda *a, **k: None)
+@patch("server.save_clubs", lambda *a, **k: None)
+@patch("server.save_competitions", lambda *a, **k: None)
+def test_purchase_places_more_than_available():
+    client = server.app.test_client()
+
     response = client.post(
         "/purchase_places",
         data={
             "competition": "Spring Festival",
             "club": "Simply Lift",
-            "places": "13",
+            "places": "12",
         },
         follow_redirects=True,
     )
+
     assert response.status_code == 200
-    after = int(competition[0]["numberOfPlaces"])
-    assert after == 12
+    assert int(server.competitions[0]["numberOfPlaces"]) == 10
 
 
+@patch.object(server, "clubs", [
+    {"name": "Simply Lift", "email": "john@simplylift.co", "points": "25"}
+])
+@patch.object(server, "competitions", [
+    {"name": "Spring Festival", "date": "2023-08-10 09:00:00", "numberOfPlaces": "10"}
+])
+@patch("server.save_booking", lambda *a, **k: None)
+@patch("server.save_clubs", lambda *a, **k: None)
+@patch("server.save_competitions", lambda *a, **k: None)
+def test_purchase_places_in_finished_competition():
+    client = server.app.test_client()
 
-def test_purchase_places_more_than_available(client, competition_line_up_ten_places):
-    competition = competition_line_up_ten_places
     response = client.post(
         "/purchase_places",
         data={
             "competition": "Spring Festival",
             "club": "Simply Lift",
-            "places": "12",
+            "places": "2",
         },
         follow_redirects=True,
     )
 
-    after = int(competition[0]["numberOfPlaces"])
-    assert after == 10
+    assert response.status_code == 200
+    assert int(server.competitions[0]["numberOfPlaces"]) == 10
 
 
-def test_purcharse_places_with_ten_points(client, club_with_ten_points):
-    club = club_with_ten_points
-    response = client.post(
-        "/purchase_places",
-        data={
-            "competition": "Spring Festival",
-            "club": "Simply Lift",
-            "places": "12",
-        },
-        follow_redirects=True,
-    )
 
-    after = int(club[0]["points"])
-    assert after == 10
+@patch.object(server, "clubs", [
+    {"name": "Simply Lift", "email": "john@simplylift.co", "points": "25"}
+])
+@patch.object(server, "competitions", [
+    {"name": "Spring Festival", "date": "2027-10-10 09:00:00", "numberOfPlaces": "20"}
+])
+@patch("server.save_booking", lambda *a, **k: None)
+@patch("server.save_clubs", lambda *a, **k: None)
+@patch("server.save_competitions", lambda *a, **k: None)
+def test_purchase_twelve_places_limit_enforced():
 
-
-def test_purchase_places_in_finished_competition(client, finished_competition):
-    competition = finished_competition
-    response = client.post("/purchase_places", data ={
-        "competition":"Spring Festival",
-        "club" : "Simply Lift",
-        "places" : "2",
-        },
-        follow_redirects=True)
-    
-    after = int(competition[0]["numberOfPlaces"])
-    assert after == 10
-
-
-def test_purchase_twelve_places(client, limit_purchase_twelve_places_in_different_section):
-    places_purchased = limit_purchase_twelve_places_in_different_section
+    client = server.app.test_client()
     response = client.post(
         "/purchase_places",
         data={
             "competition": "Spring Festival",
             "club": "Simply Lift",
             "places": "20",
-    },
+        },
         follow_redirects=True,
     )
-    after = places_purchased 
-    assert after == 12
 
-def test_purchase_twelve_places(client, limit_purchase_twelve_places_in_different_section):
-    places_purchased = limit_purchase_twelve_places_in_different_section
-    response = client.post(
-        "/purchase_places",
-        data={
-            "competition": "Spring Festival",
-            "club": "Simply Lift",
-            "places": "11",
-    },
-        follow_redirects=True,
-    )
-    assert get_purchased_places({"name":"Simply Lift"},{"name":"Spring Festival"}) == 11
-
-    response = client.post(
-        "/purchase_places",
-        data={
-            "competition": "Spring Festival",
-            "club": "Simply Lift",
-            "places": "1",
-    },
-        follow_redirects=True,
-    )
-    assert get_purchased_places({"name":"Simply Lift"},{"name":"Spring Festival"}) == 12
-
-    response = client.post(
-        "/purchase_places",
-        data={
-            "competition": "Spring Festival",
-            "club": "Simply Lift",
-            "places": "1",
-    },
-        follow_redirects=True,
-    )
-    assert get_purchased_places({"name":"Simply Lift"},{"name":"Spring Festival"}) == 12
+    assert response.status_code == 200
+    assert int(server.competitions[0]["numberOfPlaces"]) == 20
 
 
+def test_purchase_twelve_places_in_multiple_requests():
+
+    with patch.object(server, "clubs", [
+    {"name": "Simply Lift", "email": "john@simplylift.co", "points": "25"}
+    ], create=True), \
+     patch.object(server, "competitions", [
+    {"name": "Spring Festival", "date": "2027-10-10 09:00:00", "numberOfPlaces": "25"}
+    ], create=True):
+    
+        client = server.app.test_client()
+        resp1 = client.post(
+            "/purchase_places",
+            data={
+                "competition": "Spring Festival",
+                "club": "Simply Lift",
+                "places": "11",
+            },
+            follow_redirects=True,
+        )
+        assert resp1.status_code == 200
+        assert get_purchased_places("Simply Lift","Spring Festival") == 11
+
+        resp2 = client.post(
+            "/purchase_places",
+            data={
+                "competition": "Spring Festival",
+                "club": "Simply Lift",
+                "places": "1",
+            },
+            follow_redirects=True,
+        )
+        assert resp2.status_code == 200
+        assert get_purchased_places("Simply Lift","Spring Festival") == 12
+
+        resp3 = client.post(
+            "/purchase_places",
+            data={
+                "competition": "Spring Festival",
+                "club": "Simply Lift",
+                "places": "1",
+            },
+            follow_redirects=True,
+        )
+        assert resp3.status_code == 200
+        assert get_purchased_places("Simply Lift","Spring Festival") == 12

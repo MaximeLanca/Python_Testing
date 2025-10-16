@@ -13,7 +13,6 @@ app.register_blueprint(filters_bp)
 
 competitions = load_competitions()
 clubs = load_clubs()
-print("compte")
 
 
 @app.route('/')
@@ -75,7 +74,8 @@ def purchase_places():
         flash ("The competition is over.")
         return redirect(url_for('welcome', club_name=club["name"]))
     
-    places_purchased = get_purchased_places(club,competition)
+    places_purchased = get_purchased_places(club["name"],competition["name"])
+
 
     if ( places_purchased + places_required ) > 12:
         flash ("You have reached the purchase limit.")
@@ -94,12 +94,7 @@ def purchase_places():
     save_booking(booking)
     flash(f"Great-booking complete! You purcharsed {places_required} places.")
 
-    print(clubs,competitions)
     return redirect(url_for('welcome', club_name=club["name"]))
-
-    
-
-# TODO: Add route for points display
 
 
 @app.route('/logout')
